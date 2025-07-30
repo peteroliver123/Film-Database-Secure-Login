@@ -1,21 +1,2 @@
-# Ignore IntelliJ/PyCharm project files
 
-# Ignore Python bytecode and cache
-__pycache__/
-*.py[cod]
 
-# Ignore virtual environment folders
-venv/
-ENV/
-env/
-env.bak/
-*.env
-
-# Ignore OS-specific files
-.DS_Store
-Thumbs.db
-
-# Ignore editor/IDE temp files
-*.log
-*.swp
-*~
