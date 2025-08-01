@@ -1,6 +1,7 @@
 # Connecting to Server
-import pymysql
 import security
+from security import secure_quit
+
 
 def search_fun(session):
     print("Welcome to Search!")
@@ -40,7 +41,7 @@ def command_handler(command, session):
             return
         #profileFun()
         case "LOGOUT":
-            quit(session, "User logged out!")
+            secure_quit(session, "User logged out!")
         case _:
             command = input("Command not recognised. Try again or type HELP:\n")
             command_handler(command, session)

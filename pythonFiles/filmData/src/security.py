@@ -1,4 +1,3 @@
-from sqlalchemy.testing.engines import close_open_connections
 
 import main
 import pymysql
@@ -9,10 +8,10 @@ Encapsulated code inside this class and this file for functions for
 extra security.
 """
 class CurrentSession:
-    def __init__(self, name, is_admin, conn):
+    def __init__(self, name, is_admin):
         self.user_name = name
         self.is_admin = is_admin
-        self.conn = conn
+        self.conn = None
         self.cursor = ""
 
     def get_user_name(self):
