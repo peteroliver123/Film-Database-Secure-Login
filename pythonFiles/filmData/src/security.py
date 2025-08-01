@@ -26,7 +26,6 @@ class CurrentSession:
 
     def open_conn(self):
         self.conn = pymysql.connect(host="localhost", user="root", password="Founders72!", database="record_boxes")
-        print("Connected to FilmDatabase!")
         self.cursor = self.conn.cursor()
 
     def close_conn(self):
@@ -81,6 +80,7 @@ def login():
     stored_password = read_passwords(name)
     if stored_password != -1:
         s = CurrentSession(name, False)
+        s.open_conn()
         i = 3
         while i != 0:
             password = input("Enter Password: ").strip()
@@ -95,14 +95,14 @@ def login():
                         s.set_is_admin(True)
                         main.launch(s)
                     else :
-                        quit("Incorrect! Logging you out!")
+                        secure_quit(s, "Incorrect! Logging you out!")
                 else :
                     main.launch(s)
                     break
             else :
                 i -= 1
                 print(f"Password Incorrect! {i} attempts remaining! Type CANCEL to try another name or enter correct password")
-        quit("Password wrong too many times!")
+        secure_quit(s, "Password wrong too many times!")
     else:
         while True:
             command = input(f"Username {name} does not exist.\nType CREATE to make this a username, type CANCEL to try another name\n").upper()

@@ -40,7 +40,7 @@ def command_handler(command, session):
             return
         #profileFun()
         case "LOGOUT":
-            exit("User logged out!")
+            quit(session, "User logged out!")
         case _:
             command = input("Command not recognised. Try again or type HELP:\n")
             command_handler(command, session)
