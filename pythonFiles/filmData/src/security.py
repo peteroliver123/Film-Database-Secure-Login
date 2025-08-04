@@ -43,18 +43,22 @@ def create_new_user(new_name):
     file = open("files/passwords.txt", "a")
     password_count = 3
     while True:
-        new_password = input("Enter a password: ")
-        confirm_password = input("Confirm password: ")
+        new_password = input("Enter a password: ").strip()
+        if new_password.upper() == "CANCEL" :
+            break
+        confirm_password = input("Confirm password: ").strip()
+        if confirm_password.upper() == "CANCEL" :
+            break
         if new_password != confirm_password :
             password_count -= 1
             if password_count == 0:
                 quit("Passwords didn't match too many times!")
             print(f"Passwords didn't match! {password_count} attempts remaining!")
         else :
-            file.write(new_name + " " + new_password.strip() + "\n")
+            file.write(new_name + " " + new_password + "\n")
+            print("New Account Created! Login to continue!")
             break
     file.close()
-    print("New Account Created! Login to continue!")
     login()
 
 #This function reads the password file, and returns -1 if username not found
@@ -89,10 +93,12 @@ def login():
                 print("Password Correct!")
                 if name == "ADMIN":
                     manufacturer_code = "X5ry&cvgHTY6574"
-                    code = input("Enter manufacturer code to gain access (Warning 1 attempt) (Warning admin can cause damage to server):\n")
+                    code = input("Enter manufacturer code to gain access (Warning 1 attempt) (Warning admin can cause damage to server):\n").strip()
                     if code == manufacturer_code:
                         s.set_is_admin(True)
                         main.launch(s)
+                    elif code.upper() == "CANCEL" :
+                        login()
                     else :
                         secure_quit(s, "Incorrect! Logging you out!")
                 else :
@@ -102,9 +108,9 @@ def login():
                 i -= 1
                 print(f"Password Incorrect! {i} attempts remaining! Type CANCEL to try another name or enter correct password")
         secure_quit(s, "Password wrong too many times!")
-    else:
+    else :
         while True:
-            command = input(f"Username {name} does not exist.\nType CREATE to make this a username, type CANCEL to try another name\n").upper()
+            command = input(f"Username {name} does not exist.\nType CREATE to make this a username, type CANCEL to try another name\n").upper().split()[0]
             if command == "CREATE":
                 create_new_user(name)
                 break

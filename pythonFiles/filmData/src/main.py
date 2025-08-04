@@ -1,19 +1,18 @@
 # Connecting to Server
 import security
-from security import secure_quit
 
 
 def search_fun(session):
     print("Welcome to Search!")
     print("Separate multiple entries with spaces")
-    film_name = input("Enter film name (to search by name or press enter to leave blank)\n")
-    age_rating = input("Enter any amount of age ratings (to search by age or press enter to leave blank)\n")
-    id_number = input("Enter an id (to search by id or press enter to leave blank)\n")
-    location = input("Enter any amount of locations (to search by location or press enter to leave blank)\n")
+    film_name = input("Enter film name (to search by name or press enter to leave blank)\n").strip()
+    age_rating = input("Enter any amount of age ratings (to search by age or press enter to leave blank)\n").strip()
+    id_number = input("Enter an id (to search by id or press enter to leave blank)\n").strip()
+    location = input("Enter any amount of locations (to search by location or press enter to leave blank)\n").strip()
 
     print(f"You entered:\n{film_name}\n{age_rating}\n{id_number}\n{location}")
     while True :
-        command = input("If you are happy with these type GO, type REENTER to re-enter and type MAIN to return to main menu")
+        command = input("If you are happy with these type GO, type REENTER to re-enter and type MAIN to return to main menu").strip().split()[0].upper()
         match command:
             case "GO":
                 #launch_search()
@@ -24,13 +23,15 @@ def search_fun(session):
             case "MAIN":
                 main_menu(session)
                 break
+            case _:
+                print("Command not recognised!")
 
 def command_handler(command, session):
     match command:
         case "HELP":
             print("Here are some sample commands")
             print("SEARCH\nEDIT\nPROFILE\nLOGOUT\n")
-            command = input("Try entering one of these\n")
+            command = input("Try entering one of these\n").strip().upper().split()[0]
             command_handler(command, session)
         case "SEARCH":
             search_fun(session)
@@ -41,13 +42,13 @@ def command_handler(command, session):
             return
         #profileFun()
         case "LOGOUT":
-            secure_quit(session, "User logged out!")
+            security.secure_quit(session, "User logged out!")
         case _:
-            command = input("Command not recognised. Try again or type HELP:\n")
+            command = input("Command not recognised. Try again or type HELP:\n").strip().upper().split()[0]
             command_handler(command, session)
 
 def main_menu(session):
-    command = input("\nHello " + session.user_name + "! How can I help you today? (Type HELP if you are new)\n").strip().upper()
+    command = input("\nHello " + session.user_name + "! How can I help you today? (Type HELP if you are new)\n").split()[0].strip().upper()
     command_handler(command, session)
 
 def launch(session):
