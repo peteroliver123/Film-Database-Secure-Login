@@ -1,6 +1,22 @@
 # Connecting to Server
 import security
 
+def edit_fun(session):
+    print("Welcome to Edit!")
+    command = input("Type DELETE (admin only), RENAME, REPASSWORD, CANCEL\n").strip().upper().split()[0]
+    if command == "DELETE":
+        if session.get_is_admin() :
+            name_to_delete = input("Enter the username of the account you want to delete\n").strip()
+            if name_to_delete == "ADMIN" :
+                print("Cannot delete admin!")
+            else :
+                if security.delete_accounts(session, name_to_delete) == 1:
+                    print(f"Deleted {name_to_delete} successfully!")
+        else :
+            print("Delete requires ADMIN privileges")
+    else :
+        print("Site not made yet")
+    main_menu(session)
 
 def search_fun(session):
     print("Welcome to Search!")
@@ -36,11 +52,10 @@ def command_handler(command, session):
         case "SEARCH":
             search_fun(session)
         case "EDIT":
-            return
-        #editFun()
+            edit_fun(session)
         case "PROFILE":
             return
-        #profileFun()
+        #profile_fun()
         case "LOGOUT":
             security.secure_quit(session, "User logged out!")
         case _:
