@@ -1,5 +1,9 @@
 import main
 import pymysql
+import user_classes
+from datetime import datetime, date
+
+NUMBER_PASSWORD_WRONG = 3
 
 """
 CurrentSession class manages the current state. Which User is logged in
@@ -7,21 +11,15 @@ and whether they are ADMIN (and hence have access to certain privileges)
 Encapsulated code inside this class and this file for functions for
 extra security.
 """
+
 class CurrentSession:
-    def __init__(self, name, is_admin):
-        self.user_name = name
-        self.is_admin = is_admin
+    def __init__(self, user_profile):
+        self.user_profile = user_profile
         self.conn = None
         self.cursor = ""
 
-    def get_user_name(self):
-        return self.user_name
-
-    def get_is_admin(self):
-        return self.is_admin
-
-    def set_is_admin(self, boolean):
-        self.is_admin = boolean
+    def get_user(self):
+        return self.user_profile
 
     def open_conn(self):
         self.conn = pymysql.connect(host="localhost", user="root", password="Founders72!", database="record_boxes")
@@ -33,29 +31,37 @@ class CurrentSession:
     def get_cursor(self):
         return self.cursor
 
-def delete_accounts(session, name_to_delete):
-    if not session :
-        print("Session Empty")
-        return -1
-    found_name = False
-    file = open("files/passwords.txt", "r")
+def rewrite_file_without_line(file_path, name_to_leave, typer):
+    found_name_to_leave = False
+    file = open(file_path, "r")
     lines = file.readlines()
     new_lines = []
     for line in lines :
-        *name, _ = line.strip().split()
-        name = " ".join(name)
-        if not name == name_to_delete :
-           new_lines.append(line)
+        if typer:
+            *name, _, _, _, _, _, _, _ = line.strip().split()
         else :
-            found_name = True
-    if not found_name :
-        print("Name not found!")
+            *name, _ = line.strip().split()
+        name = " ".join(name)
+        if not name == name_to_leave :
+            new_lines.append(line)
+        else :
+            found_name_to_leave = True
+    if not found_name_to_leave :
         return -1
     file.close()
-    file = open("files/passwords.txt", "w")
+    file = open(file_path, "w")
     file.writelines(new_lines)
     file.close()
     return 1
+
+
+def delete_accounts(name_to_delete):
+    result = rewrite_file_without_line("files/passwords.txt", name_to_delete, False)
+    result2 = rewrite_file_without_line("files/users.txt", name_to_delete, True)
+    if result == -1 or result2 == -1:
+        print("Name not found")
+    else :
+        print(f"Deleted {name_to_delete} successfully!")
 
 
 def password_checker(password):
@@ -105,30 +111,42 @@ def secure_quit(session, code):
 
 #This function creates a new user and saves the password
 def create_new_user(new_name):
-    file = open("files/passwords.txt", "a")
-    password_count = 3
-    while True:
         new_password = input("Enter a password: ").strip()
 
         while password_checker(new_password):
             new_password = input("Enter a password: ").strip()
-
         if new_password.upper() == "CANCEL" :
-            break
+            login()
+
         confirm_password = input("Confirm password: ").strip()
+
         if confirm_password.upper() == "CANCEL" :
-            break
-        if new_password != confirm_password :
-            password_count -= 1
-            if password_count == 0:
-                secure_quit(None, "Passwords didn't match too many times!")
-            print(f"Passwords didn't match! {password_count} attempts remaining!")
-        else :
+            login()
+
+        if new_password == confirm_password :
+            file = open("files/passwords.txt", "a")
             file.write(new_name + " " + new_password + "\n")
-            print("New Account Created! Login to continue!")
-            break
-    file.close()
-    login()
+            file.close()
+            print("New Account Created!")
+            new_user = user_classes.NewUserProfile(new_name, date.today(), datetime.now().time())
+            new_user.write_new_user()
+            return new_user
+        else :
+            return -1
+
+
+def create_new_user_loop(new_name):
+    password_count = NUMBER_PASSWORD_WRONG
+    outcome = create_new_user(new_name)
+    while outcome == -1:
+        password_count -= 1
+        if password_count == 0:
+            secure_quit(None, "Passwords didn't match too many times!")
+        print(f"Passwords didn't match! {password_count} attempts remaining!")
+        outcome = create_new_user(new_name)
+
+    return outcome
+
 
 #This function reads the password file, and returns -1 if username not found
 def read_passwords(user_name):
@@ -139,6 +157,40 @@ def read_passwords(user_name):
         if name == user_name:
             file.close()
             return password
+    file.close()
+    return -1
+
+#This function reads the users file, and returns -1 if user not found
+def read_users(user_name):
+    file = open("files/users.txt", "r")
+    for row in file:
+        *name, date_created, time_created, is_locked, date_unlock, time_unlock, num_fails, is_admin = row.strip().split()
+
+        name = " ".join(name)
+        if date_created == "None":
+            date_created = None
+        else :
+            date_created = datetime.strptime(date_created, "%Y-%m-%d").date()
+        if time_created == "None":
+            time_created = None
+        else :
+            time_created = datetime.strptime(time_created, "%H:%M:%S.%f").time()
+        is_locked = is_locked == "True"
+        if date_unlock == "None":
+            date_unlock = None
+        else :
+            date_unlock = datetime.strptime(date_unlock, "%Y-%m-%d").date()
+        if time_unlock == "None":
+            time_unlock = None
+        else :
+            time_unlock = datetime.strptime(time_unlock, "%H:%M:%S.%f").time()
+        num_fails = int(num_fails)
+        is_admin = is_admin == "True"
+
+        existing_user = user_classes.ExistingUserProfile(name, date_created, time_created, is_locked, date_unlock, time_unlock, num_fails, is_admin)
+        if name == user_name:
+            file.close()
+            return existing_user
     file.close()
     return -1
 
@@ -155,38 +207,52 @@ def login():
         login()
     stored_password = read_passwords(name)
     if stored_password != -1:
-        s = CurrentSession(name, False)
-        s.open_conn()
-        password_attempts = 3
-        while password_attempts != 0:
-            password = input("Enter Password: ").strip()
-            if password.upper() == "CANCEL" :
-                login()
-            elif password == stored_password:
-                print("Password Correct!")
-                if name == "ADMIN":
-                    #manufacturer_code = "X5ry&cvgHTY6574"
-                    manufacturer_code = "X"
-                    code = input("Enter manufacturer code to gain access (Warning 1 attempt) (Warning admin can cause damage to server):\n").strip()
-                    if code == manufacturer_code:
-                        s.set_is_admin(True)
-                        main.launch(s)
-                    elif code.upper() == "CANCEL" :
-                        login()
-                    else :
-                        secure_quit(s, "Incorrect! Logging you out!")
+        user = read_users(name)
+        if user == -1:
+           exit("Unrecoverable error occurred!")
+        else :
+            if user.get_is_locked() :
+                result_unlock = user.unlock_valid()
+                if result_unlock == -1 :
+                    secure_quit(None, "You are locked out!")
                 else :
-                    main.launch(s)
-                    break
+                    login()
             else :
-                password_attempts -= 1
-                print(f"Password Incorrect! {password_attempts} attempts remaining! Type CANCEL to try another name or enter correct password")
-        secure_quit(s, "Password wrong too many times!")
+                s = CurrentSession(user)
+                s.open_conn()
+                while s.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
+                    password = input("Enter Password: ").strip()
+                    if password.upper() == "CANCEL" :
+                        login()
+                    elif password == stored_password:
+                        print("Password Correct!")
+                        if s.get_user().get_is_admin():
+                            #manufacturer_code = "X5ry&cvgHTY6574"
+                            manufacturer_code = "X"
+                            code = input("Enter manufacturer code to gain access (Warning 1 attempt) (Warning admin can cause damage to server):\n").strip()
+                            if code == manufacturer_code:
+                                main.launch(s)
+                            elif code.upper() == "CANCEL" :
+                                login()
+                            else :
+                                secure_quit(s, "Incorrect! Logging you out!")
+                        else :
+                            main.launch(s)
+                            break
+                    else :
+                        s.get_user().increment_num_fails()
+                        if s.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
+                            print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - s.get_user().get_num_fails()} attempts remaining! Type CANCEL to try another name or enter correct password")
+                s.get_user().lock_account()
+                secure_quit(s, f"Password wrong too many times! Your account has been locked until {s.get_user().get_date_unlock()} {s.get_user().get_time_unlock()}")
     else :
         while True:
             command = input(f"Username {name} does not exist.\nType CREATE to make this a username, type CANCEL to try another name\n").upper().split()[0]
             if command == "CREATE":
-                create_new_user(name)
+                user = create_new_user_loop(name)
+                s = CurrentSession(user)
+                s.open_conn()
+                main.launch(s)
                 break
             elif command == "CANCEL":
                 login()
@@ -195,7 +261,7 @@ def login():
 
 
 # Note could use prompt to have passwords protected with ****
-# Only works in terminal ):
+# Only works in terminal ():
 
 # Password hashing
 

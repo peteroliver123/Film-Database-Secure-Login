@@ -5,13 +5,12 @@ def edit_fun(session):
     print("Welcome to Edit!")
     command = input("Type DELETE (admin only), RENAME, REPASSWORD, CANCEL\n").strip().upper().split()[0]
     if command == "DELETE":
-        if session.get_is_admin() :
+        if session.get_user().get_is_admin() :
             name_to_delete = input("Enter the username of the account you want to delete\n").strip()
             if name_to_delete == "ADMIN" :
                 print("Cannot delete admin!")
             else :
-                if security.delete_accounts(session, name_to_delete) == 1:
-                    print(f"Deleted {name_to_delete} successfully!")
+                security.delete_accounts(name_to_delete)
         else :
             print("Delete requires ADMIN privileges")
     else :
@@ -63,12 +62,12 @@ def command_handler(command, session):
             command_handler(command, session)
 
 def main_menu(session):
-    command = input("\nHello " + session.user_name + "! How can I help you today? (Type HELP if you are new)\n").split()[0].strip().upper()
+    command = input("\nHello " + session.get_user().get_user_name() + "! How can I help you today? (Type HELP if you are new)\n").split()[0].strip().upper()
     command_handler(command, session)
 
 def launch(session):
     print("Logging you in ...")
-    print("Current User is " + session.user_name)
+    print("Current User is " + session.get_user().get_user_name())
 
     main_menu(session)
 
