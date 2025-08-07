@@ -1,5 +1,10 @@
+# Built-In Imports
 from datetime import datetime, timedelta, date
-import security
+
+# My File Imports
+from file import rewrite_file_without_line
+
+
 
 class UserProfile:
     # Constructor #
@@ -76,7 +81,7 @@ class UserProfile:
         return -1
 
     def rewrite_users(self):
-        result = security.rewrite_file_without_line("files/users.txt", self.user_name, True)
+        result = rewrite_file_without_line("files/users.txt", self.user_name)
         if result == -1 :
             print("Username doesn't exist!")
         else :
