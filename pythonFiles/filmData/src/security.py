@@ -1,5 +1,5 @@
 # Built-In Imports
-from pymysql import connect
+import pymysql
 from datetime import datetime, date
 
 # My File Imports
@@ -18,13 +18,13 @@ class CurrentSession:
     def __init__(self, user_profile):
         self.user_profile = user_profile
         self.conn = None
-        self.cursor = ""
+        self.cursor = None
 
     def get_user(self):
         return self.user_profile
 
     def open_conn(self):
-        self.conn = connect(host="localhost", user="root", password="Founders72!", database="record_boxes")
+        self.conn = pymysql.connect(host="localhost", user="root", password="Founders72!", database="record_boxes")
         self.cursor = self.conn.cursor()
 
     def close_conn(self):
@@ -32,6 +32,11 @@ class CurrentSession:
 
     def get_cursor(self):
         return self.cursor
+
+    def print_results(self):
+        results = (self.cursor.fetchall())
+        for row in results:
+            print(*row)
 
 def delete_accounts(name_to_delete):
     result = rewrite_file_without_line("files/passwords.txt", name_to_delete)
@@ -170,7 +175,8 @@ def login():
     split_name = name.split()[0]
     if len(split_name) > 20 :
         print("Username too long!")
-        login()
+        return_value = login()
+        return return_value
     stored_password = read_passwords(name)
     if stored_password != -1:
         user = read_users(name)
@@ -182,36 +188,39 @@ def login():
                 if result_unlock == -1 :
                     secure_quit(None, "You are locked out!")
                 else :
-                    login()
+                    return_value = login()
+                    return return_value
             else :
-                s = CurrentSession(user)
-                s.open_conn()
-                while s.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
+                session = CurrentSession(user)
+                session.open_conn()
+                while session.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
                     password = secure_input("Enter Password: ")
                     if password.upper() == "CANCEL" :
-                        login()
-                        break
+                        return_value = login()
+                        return return_value
                     elif password == stored_password:
                         print("Password Correct!")
-                        if s.get_user().get_is_admin():
+                        if session.get_user().get_is_admin():
                             #manufacturer_code = "X5ry&cvgHTY6574"
                             manufacturer_code = "X"
                             code = secure_input("Enter manufacturer code to gain access (Warning 1 attempt) (Warning admin can cause damage to server):\n")
                             if code == manufacturer_code:
-                                return s
+                                return session
                             elif code.upper() == "CANCEL" :
-                                login()
-                                break
+                                return_value = login()
+                                return return_value
                             else :
-                                secure_quit(s, "Incorrect! Logging you out!")
+                                secure_quit(session, "Incorrect! Logging you out!")
                         else :
-                            return s
+                            return session
+
                     else :
-                        s.get_user().increment_num_fails()
-                        if s.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
-                            print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - s.get_user().get_num_fails()} attempts remaining! Type CANCEL to try another name or enter correct password")
-                s.get_user().lock_account()
-                secure_quit(s, f"Password wrong too many times! Your account has been locked until {s.get_user().get_date_unlock()} {s.get_user().get_time_unlock()}")
+                        session.get_user().increment_num_fails()
+                        if session.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
+                            print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - session.get_user().get_num_fails()} attempts remaining! Type CANCEL to try another name or enter correct password")
+                session.get_user().lock_account()
+                secure_quit(session, f"Password wrong too many times! Your account has been locked until {session.get_user().get_date_unlock()} {session.get_user().get_time_unlock()}")
+
     else :
         while True:
             command = secure_input(f"Username {name} does not exist.\nType CREATE to make this a username, type CANCEL to try another name\n").upper().split()[0]
@@ -221,8 +230,8 @@ def login():
                 s.open_conn()
                 return s
             elif command == "CANCEL":
-                login()
-                break
+                return_value = login()
+                return return_value
             else :
                 print("Invalid Command!")
 

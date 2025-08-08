@@ -1,11 +1,13 @@
 from util import secure_input
 
 def duplicate_search(session):
-    locations = secure_input("Enter any amount of locations (max 3)")
+    locations = secure_input("Enter any amount of locations (max 3)").split()
     if len(locations) == 3:
-        session.get_cursor().callproc('passThreeTableNames', locations[0], locations[1], locations[3])
+        session.get_cursor().callproc('passThreeTableNames', (locations[0], locations[1], locations[2]))
+        session.print_results()
     elif len(locations) == 2:
-        session.get_cursor().callproc('passTwoTableNames', locations[0], locations[1])
+        session.get_cursor().callproc('passTwoTableNames', (locations[0], locations[1]))
+        session.print_results()
     elif len(locations) == 1:
         print("Too few locations!")
         duplicate_search(session)

@@ -28,6 +28,8 @@ def main_menu(session):
     command_handler(command, session)
 
 def launch(session):
+    if session is None:
+        secure_quit(session, "A strange error occurred")
     print("Logging you in ...")
     print("Current User is " + session.get_user().get_user_name())
 
