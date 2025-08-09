@@ -1,6 +1,30 @@
 from util import secure_input
 from file import rewrite_file_without_line
 
+def switch_two_fa(is_on):
+    print("The 2FA functionality has not been implemented yet! Please come back later")
+
+def two_fa_settings(session):
+    print("Welcome to 2FA!")
+    session.get_cursor().callproc('twoFaSettings')
+    is_on = session.get_cursor().fetchone()[0]
+    if is_on :
+        print("2FA is currently on!")
+    else :
+        print("2FA is currently off!")
+
+    while True:
+        command = secure_input("Enter SWITCH to change this setting or CANCEL to go back").strip().upper().split()[0]
+        match command:
+            case "SWITCH":
+                switch_two_fa(is_on)
+            case "CANCEL":
+                profile_fun(session)
+            case _:
+                print("Command not recognised!")
+
+
+
 def delete_accounts(name_to_delete):
     result = rewrite_file_without_line("files/passwords.txt", name_to_delete)
     result2 = rewrite_file_without_line("files/users.txt", name_to_delete)
@@ -17,13 +41,13 @@ def profile_fun(session):
             case "HELP":
                 print("List of Commands:")
                 print("2FA = 2FA Settings")
-                print("DELETE = Delete Users")
-                print("RENAME = Re-name Users")
+                print("DELETE = Delete Users (ADMIN only)")
+                print("RENAME = Re-name Users (ADMIN only)")
                 print("PASSWORD_RESET = Reset Password")
                 print("ACCOUNT_INFO = Account Info")
                 print("MAIN = Return to Main Menu")
             case "2FA":
-                pass
+                two_fa_settings(session)
                 break
             case "DELETE":
                 if session.get_user().get_is_admin() :
@@ -36,13 +60,17 @@ def profile_fun(session):
                     print("Delete requires ADMIN privileges")
                 break
             case "RENAME":
-                pass
+                if session.get_user().get_is_admin() :
+                    print("The RENAME functionality has not been implemented yet! Please come back later")
+                else :
+                    print("Re-name requires ADMIN privileges")
                 break
             case "PASSWORD_RESET":
-                pass
+                # could make this require 2fa
+                print("The RESET functionality has not been implemented yet! Please come back later")
                 break
             case "ACCOUNT_INFO":
-                pass
+                print("The Account Info functionality has not been implemented yet! Please come back later")
                 break
             case "MAIN":
                 return

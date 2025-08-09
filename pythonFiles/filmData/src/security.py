@@ -36,7 +36,9 @@ class CurrentSession:
     def print_results(self):
         results = (self.cursor.fetchall())
         for row in results:
-            print(*row)
+            print(row)
+        if not results :
+            print("No matching films found!")
 
 def delete_accounts(name_to_delete):
     result = rewrite_file_without_line("files/passwords.txt", name_to_delete)
@@ -165,75 +167,71 @@ def read_users(user_name):
                 return existing_user
     return -1
 
-# This function manages user login, if username doesn't exist, creates new one,
+# These functions manage user login, if username doesn't exist, creates new one,
 # if it does asks for password (performs appropriate security checks) then
 # creates a session and passes this session with needed info securely encapsulated
 # to the launch function.
-def login():
-    print(f"\nHello! Welcome to {PROJECT_NAME}! Login to continue\n")
-    name = secure_input("Enter username: ")
-    split_name = name.split()[0]
-    if len(split_name) > 20 :
-        print("Username too long!")
-        return_value = login()
-        return return_value
-    stored_password = read_passwords(name)
-    if stored_password != -1:
-        user = read_users(name)
-        if user == -1:
-           exit("Unrecoverable error occurred!")
+
+def login_to_new(name):
+    while True:
+        command = secure_input(f"Username {name} does not exist.\nType CREATE to make this a username, type CANCEL to try another name\n").upper().split()[0]
+        if command == "CREATE":
+            user = create_new_user_loop(name)
+            s = CurrentSession(user)
+            s.open_conn()
+            return s
+        elif command == "CANCEL":
+            login()
+            break
         else :
-            if user.get_is_locked() :
-                result_unlock = user.unlock_valid()
-                if result_unlock == -1 :
-                    secure_quit(None, "You are locked out!")
-                else :
-                    return_value = login()
-                    return return_value
-            else :
-                session = CurrentSession(user)
-                session.open_conn()
-                while session.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
-                    password = secure_input("Enter Password: ")
-                    if password.upper() == "CANCEL" :
-                        return_value = login()
-                        return return_value
-                    elif password == stored_password:
-                        print("Password Correct!")
-                        if session.get_user().get_is_admin():
-                            #manufacturer_code = "X5ry&cvgHTY6574"
-                            manufacturer_code = "X"
-                            code = secure_input("Enter manufacturer code to gain access (Warning 1 attempt) (Warning admin can cause damage to server):\n")
-                            if code == manufacturer_code:
-                                return session
-                            elif code.upper() == "CANCEL" :
-                                return_value = login()
-                                return return_value
-                            else :
-                                secure_quit(session, "Incorrect! Logging you out!")
-                        else :
-                            return session
+            print("Invalid Command!")
 
-                    else :
-                        session.get_user().increment_num_fails()
-                        if session.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
-                            print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - session.get_user().get_num_fails()} attempts remaining! Type CANCEL to try another name or enter correct password")
-                session.get_user().lock_account()
-                secure_quit(session, f"Password wrong too many times! Your account has been locked until {session.get_user().get_date_unlock()} {session.get_user().get_time_unlock()}")
-
+def login_to_locked(user):
+    result_unlock = user.unlock_valid()
+    if result_unlock == -1 :
+        secure_quit(None, "You are locked out!")
     else :
+        login()
+
+def login_to_old(user, stored_password):
+    if user.get_is_locked() :
+        login_to_locked(user)
+    else :
+        session = CurrentSession(user)
+        session.open_conn()
         while True:
-            command = secure_input(f"Username {name} does not exist.\nType CREATE to make this a username, type CANCEL to try another name\n").upper().split()[0]
-            if command == "CREATE":
-                user = create_new_user_loop(name)
-                s = CurrentSession(user)
-                s.open_conn()
-                return s
-            elif command == "CANCEL":
-                return_value = login()
-                return return_value
+            password = secure_input("Enter Password: ")
+            if password.upper() == "CANCEL" :
+                login()
+                break
+            elif password == stored_password:
+                print("Password Correct!")
+                return session
             else :
-                print("Invalid Command!")
+                session.get_user().increment_num_fails()
+                if session.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
+                    print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - session.get_user().get_num_fails()} attempts remaining! Type CANCEL to try another name or enter correct password")
+                else :
+                    session.get_user().lock_account()
+                    secure_quit(session, f"Password wrong too many times! Your account has been locked until {session.get_user().get_date_unlock()} {session.get_user().get_time_unlock()}")
+                    break
+
+def login():
+    while True:
+        print(f"\nHello! Welcome to {PROJECT_NAME}! Login to continue\n")
+        name = secure_input("Enter Username: ")
+        if len(name.split()[0]) > 20:
+            print("Username too long!")
+        else :
+            stored_password = read_passwords(name)
+            if stored_password == -1:
+                return login_to_new(name)
+            else :
+                user = read_users(name)
+                if user == -1:
+                    exit("User Data Incomplete!")
+                else :
+                    return login_to_old(user, stored_password)
 
 
 # Note could use prompt to have passwords protected with ****
@@ -241,22 +239,5 @@ def login():
 
 # Password hashing
 
-# Validate:
-# usernames (length, characters)
-# passwords (strength, common-password checks)
-
-#password strength library
-#pip install zxcvbn
-#from zxcvbn import zxcvbn
-#print(zxcvbn("hunter2"))
-
-#audit logging
-
-# Don't store passwords in plaintext
-# Don't rely on base64 or ROT13 for “security”
-# Don’t roll your own crypto – use trusted libraries
-# Don’t hardcode secrets or keys
-# track number of failed attempts (across sessions) per user and lockout time
-# Show generic message: “Login failed” (not "wrong password" or "user not found").
 # Exponential backoff: Lockout duration increases after repeated offenses.
 # Optionally, track by IP address or device too.
