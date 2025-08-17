@@ -1,5 +1,4 @@
 from util import secure_input
-from file import rewrite_file_without_line
 
 def switch_two_fa(is_on):
     print("The 2FA functionality has not been implemented yet! Please come back later")
@@ -23,15 +22,17 @@ def two_fa_settings(session):
             case _:
                 print("Command not recognised!")
 
-
-
-def delete_accounts(name_to_delete):
-    result = rewrite_file_without_line("files/passwords.txt", name_to_delete)
-    result2 = rewrite_file_without_line("files/users.txt", name_to_delete)
-    if result == -1 or result2 == -1:
-        print("Name not found")
-    else :
+def delete_accounts(session, name_to_delete):
+    result = session.get_cursor().callproc('basicNameSearch', [name_to_delete])
+    session.commit()
+    if result :
+        session.get_cursor().callproc('dropRowPassword', [name_to_delete])
+        session.commit()
+        session.get_cursor().callproc('dropRowUser', [name_to_delete])
+        session.commit()
         print(f"Deleted {name_to_delete} successfully!")
+    else :
+        print("Name not found")
 
 def profile_fun(session):
     print("Welcome to Profile!")
@@ -55,7 +56,7 @@ def profile_fun(session):
                     if name_to_delete == "ADMIN" :
                         print("Cannot delete admin!")
                     else :
-                        delete_accounts(name_to_delete)
+                        delete_accounts(session, name_to_delete)
                 else :
                     print("Delete requires ADMIN privileges")
                 break
