@@ -1,16 +1,14 @@
-import pyotp
-import qrcode
+import bcrypt
 
-def set_up_2fa():
-    user_email = "Brackenp18@gmail.com"
-    secret = pyotp.random_base32()
-    totp = pyotp.TOTP(secret)
+# Hashing a password
+password = b"super_secret_password"
+hashed = bcrypt.hashpw(password, bcrypt.gensalt())
 
-    uri = totp.provisioning_uri(name=user_email, issuer_name="GoogleAuthenticator")
-    img = qrcode.make(uri)
-    img.show()
+print(hashed)  # stored in DB
 
-    print("Save this secret:", secret)  # 👈 COPY THIS
-    return secret
-
-set_up_2fa()
+# Verifying a password
+entered = b"super_secret_password"
+if bcrypt.checkpw(entered, hashed):
+    print("Password matches!")
+else:
+    print("Invalid password")

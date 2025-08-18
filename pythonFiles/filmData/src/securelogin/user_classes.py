@@ -1,7 +1,6 @@
 # Built-In Imports
 from datetime import datetime
 
-
 class UserProfile:
     # Constructor #
     def __init__(self, user_name, date_created):
