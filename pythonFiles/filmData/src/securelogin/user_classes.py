@@ -1,7 +1,9 @@
 # Built-In Imports
 from datetime import datetime
 
+
 class UserProfile:
+
     # Constructor #
     def __init__(self, user_name, date_created):
         # Instantiated Variables #
@@ -53,11 +55,16 @@ class UserProfile:
         print(f"Account locked until {self.date_unlock}!")
         return -1
 
+
 class NewUserProfile(UserProfile):
+
     pass
 
+
 class ExistingUserProfile(UserProfile):
-    def __init__(self, user_name, date_created, is_locked, date_unlock, num_fails, is_admin):
+
+    def __init__(self, user_name, date_created, is_locked, date_unlock,
+                 num_fails, is_admin):
         super().__init__(user_name, date_created)
         self.is_locked = is_locked
         self.date_unlock = date_unlock

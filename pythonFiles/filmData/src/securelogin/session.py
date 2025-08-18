@@ -8,6 +8,7 @@ extra security.
 """
 
 class CurrentSession:
+
     def __init__(self):
         self.user_profile = None
         self.conn = None
@@ -23,7 +24,8 @@ class CurrentSession:
         self.user_profile = user_profile
 
     def open_conn(self):
-        self.conn = pymysql.connect(host="localhost", user="root", password="Founders72!", database="record_boxes")
+        self.conn = pymysql.connect(host="localhost", user="root",
+                                    password="Founders72!", database="record_boxes")
         self.cursor = self.conn.cursor()
 
     def close_conn(self):

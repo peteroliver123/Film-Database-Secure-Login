@@ -1,50 +1,37 @@
+# Third Party Imports
 import bcrypt
 
-#Password class
-class Password:
-    def __init__(self, password, secret):
-        self.password = password
-        self.secret = secret
 
-    # GETTER METHODS #
-    def get_password(self):
-        return self.password
-
-    def get_secret(self):
-        return self.secret
-
-#Function to write password
+#Function to write to password table
 def write_new_password(session, new_password, secret):
-    session.get_cursor().callproc('insertPassword', [session.get_user().get_user_name(), password_encrypter(new_password), secret])
+    session.get_cursor().callproc('insertPassword', [session.get_user().get_user_name(),
+                                                     password_encrypter(new_password), secret])
     session.commit()
 
-def read_two_fa(session):
+
+#Function to encrypt password
+def password_encrypter(plain_password):
+    password_bytes = plain_password.encode('utf-8')
+    hashed_bytes = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+    return hashed_bytes.decode('utf-8')  # <-- decode to string
+
+
+# Functions to read password table
+def read_passwords_data(session):
     session.get_cursor().callproc('readPasswords', [session.get_user().get_user_name()])
     results = session.get_cursor().fetchone()
-    return results[1]
+    return results
+
+
+def read_two_fa(session):
+    return read_passwords_data(session)[1]
+
 
 def read_password(session):
-    session.get_cursor().callproc('readPasswords', [session.get_user().get_user_name()])
-    results = session.get_cursor().fetchone()
-    return results[0]
+    return read_passwords_data(session)[0]
 
-#Function to read password
-def is_account(session):
-    session.get_cursor().callproc('readPasswords', [session.get_user().get_user_name()])
-    results = session.get_cursor().fetchone()
-    if not results:
-        return False
-    else :
-        return True
 
-def is_two_fa(session):
-    session.get_cursor().callproc('readPasswords', [session.get_user().get_user_name()])
-    results = session.get_cursor().fetchone()
-    if not results[1]:
-        return False
-    else :
-        return True
-
+# Function to check if given password matches stored
 def do_passwords_match(session, entered_password):
     encrypted_password = read_password(session).encode('utf-8')
     check_password = entered_password.encode('utf-8')
@@ -54,11 +41,6 @@ def do_passwords_match(session, entered_password):
     else:
         return False
 
-#Function to encrypt password
-def password_encrypter(plain_password):
-    password_bytes = plain_password.encode('utf-8')
-    hashed_bytes = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
-    return hashed_bytes.decode('utf-8')  # <-- decode to string
 
 #Function to check password strength
 def password_checker(password):
