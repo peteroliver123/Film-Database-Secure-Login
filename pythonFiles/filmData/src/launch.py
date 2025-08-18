@@ -33,7 +33,7 @@ def main_menu(session):
 
 def launch(session):
     if session is None:
-        secure_quit(session, "A strange error occurred")
+        secure_quit(session, "A strange error occurred. No session")
     print("Logging you in ...")
     print("Current User is " + session.get_user().get_user_name())
 

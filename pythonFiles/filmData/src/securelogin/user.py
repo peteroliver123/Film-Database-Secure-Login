@@ -1,8 +1,9 @@
+
 from datetime import datetime, timedelta
 
 from util import secure_input, secure_quit, NUMBER_PASSWORD_WRONG
 from securelogin.two_fa import two_fa_option
-from securelogin.password_security import password_checker, write_new_password
+from securelogin.password_security import password_checker, write_new_password, read_password
 from securelogin.user_classes import ExistingUserProfile
 
 
@@ -22,7 +23,7 @@ def read_users(session, user_name):
 
 
 #This function creates a new user
-def user_creation(session):
+def user_password_creation(session):
     password_count = NUMBER_PASSWORD_WRONG
     while True:
         new_password = secure_input("Enter a password: ")
@@ -36,16 +37,23 @@ def user_creation(session):
             return -1
 
         if new_password == confirm_password :
-            secret = two_fa_option()
-            write_new_password(session, new_password, secret)
-            write_new_user(session)
-            print("New Account Created!")
-            return session.get_user()
+            if read_password(session):
+                return new_password
+            else :
+                return user_creation(session, new_password)
         else :
             password_count -= 1
             if password_count == 0:
                 secure_quit(None, "Passwords didn't match too many times!")
             print(f"Passwords didn't match! {password_count} attempts remaining!")
+
+
+def user_creation(session, new_password):
+    secret = two_fa_option()
+    write_new_password(session, new_password, secret)
+    write_new_user(session)
+    print("New Account Created!")
+    return session.get_user()
 
 
 def rewrite_user(session):

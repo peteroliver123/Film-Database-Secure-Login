@@ -1,26 +1,8 @@
+from securelogin.password_security import read_password
+from securelogin.user import user_password_creation
 from util import secure_input
+from securelogin.two_fa import two_fa_option, unlock_two_fa
 
-def switch_two_fa(is_on):
-    print("The 2FA functionality has not been implemented yet! Please come back later")
-
-def two_fa_settings(session):
-    print("Welcome to 2FA!")
-    session.get_cursor().callproc('twoFaSettings')
-    is_on = session.get_cursor().fetchone()[0]
-    if is_on :
-        print("2FA is currently on!")
-    else :
-        print("2FA is currently off!")
-
-    while True:
-        command = secure_input("Enter SWITCH to change this setting or CANCEL to go back").strip().upper().split()[0]
-        match command:
-            case "SWITCH":
-                switch_two_fa(is_on)
-            case "CANCEL":
-                profile_fun(session)
-            case _:
-                print("Command not recognised!")
 
 def delete_accounts(session, name_to_delete):
     result = session.get_cursor().callproc('basicNameSearch', [name_to_delete])
@@ -34,6 +16,41 @@ def delete_accounts(session, name_to_delete):
     else :
         print("Name not found")
 
+
+def account_into(session):
+    session.get_cursor().callproc('readUsers', [session.get_user().get_user_name()])
+    results = session.get_cursor().fetchone()
+    print(f"Username: {results[0]}, Date Created: {results[1]}, "
+          f"Locked Out? {results[2]}, Num Lockouts: {results[4]}, Admin? {results[5]}")
+
+
+def rename(session):
+    change_flag = False
+    while True:
+        if change_flag:
+            break
+        new_name = secure_input("Enter the username you would like to rename the active account to (CANCEL to go back):\n")
+        if new_name.upper() == "CANCEL":
+            break
+        while True:
+            confirmation = secure_input(f"Rename {session.get_user().get_user_name()} to {new_name}. Proceed (Y/N): ").upper()
+            if confirmation == "Y" or confirmation == "YES":
+                session.get_cursor().callproc('rename_user', [session.get_user().get_user_name(), new_name])
+                session.commit()
+                session.get_user().set_user_name(new_name)
+                change_flag = True
+                break
+            elif confirmation == "N" or confirmation == "NO":
+                break
+
+
+def reset_password(session):
+    new_password = user_password_creation(session)
+    old_password = read_password(session)
+    session.get_cursor().callproc('reset_password', [old_password, new_password])
+    session.commit()
+
+
 def profile_fun(session):
     print("Welcome to Profile!")
     while True:
@@ -41,14 +58,14 @@ def profile_fun(session):
         match command:
             case "HELP":
                 print("List of Commands:")
-                print("2FA = 2FA Settings")
+                print("2FA = Turn On 2FA")
                 print("DELETE = Delete Users (ADMIN only)")
-                print("RENAME = Re-name Users (ADMIN only)")
+                print("RENAME = Re-name this Account")
                 print("PASSWORD_RESET = Reset Password")
                 print("ACCOUNT_INFO = Account Info")
                 print("MAIN = Return to Main Menu")
             case "2FA":
-                two_fa_settings(session)
+                secret = two_fa_option()
                 break
             case "DELETE":
                 if session.get_user().get_is_admin() :
@@ -61,17 +78,17 @@ def profile_fun(session):
                     print("Delete requires ADMIN privileges")
                 break
             case "RENAME":
-                if session.get_user().get_is_admin() :
-                    print("The RENAME functionality has not been implemented yet! Please come back later")
-                else :
-                    print("Re-name requires ADMIN privileges")
+                rename(session)
                 break
             case "PASSWORD_RESET":
                 # could make this require 2fa
-                print("The RESET functionality has not been implemented yet! Please come back later")
+                if not unlock_two_fa(session) == -1:
+                    reset_password(session)
+                else :
+                    print("Reset requires 2FA")
                 break
             case "ACCOUNT_INFO":
-                print("The Account Info functionality has not been implemented yet! Please come back later")
+                account_into(session)
                 break
             case "MAIN":
                 return

@@ -7,9 +7,8 @@ from securelogin.password_security import read_two_fa
 def unlock_two_fa(session):
     secret = read_two_fa(session)
     if secret:
-        print("You are locked out! But can get back into your account using 2fa.")
         user_otp = secure_input("Enter the onetime passcode on your two "
-                                "factor app (NO SPACES):\n")
+                                "factor app to continue (NO SPACES):\n")
         totp = pyotp.TOTP(secret)
         if totp.verify(user_otp):
             print("2FA correct!")
@@ -25,10 +24,10 @@ def two_fa_option():
     while True:
         print("Would you like to add two factor authentication to your account")
         result = secure_input("This will be needed for account "
-                              "recovery and reset: (Y/N): ")
-        if result.upper() == "Y" or result.upper() == "YES":
+                              "recovery and reset: (Y/N): ").upper()
+        if result == "Y" or result == "YES":
             return two_fa_setup()
-        elif result.upper() == "N" or result.upper() == "NO":
+        elif result == "N" or result == "NO":
             return None
 
 

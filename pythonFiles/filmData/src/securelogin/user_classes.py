@@ -35,6 +35,9 @@ class UserProfile:
         return self.is_admin
 
     # SETTER METHODS #
+    def set_user_name(self, new_name):
+        self.user_name = new_name
+
     def flip_locked(self):
         self.is_locked = self.is_locked == False
 

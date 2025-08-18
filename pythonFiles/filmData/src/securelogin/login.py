@@ -2,10 +2,10 @@
 from datetime import datetime
 
 # Local Imports
-from securelogin.password_security import do_passwords_match, read_password
+from securelogin.password_security import do_passwords_match, read_passwords_data
 from securelogin.session import CurrentSession
 from securelogin.two_fa import unlock_two_fa
-from securelogin.user import rewrite_user, user_creation, read_users, unlock_procedures, lock_account
+from securelogin.user import rewrite_user, user_password_creation, read_users, unlock_procedures, lock_account
 from securelogin.user_classes import NewUserProfile
 from util import secure_input, secure_quit, NUMBER_PASSWORD_WRONG, PROJECT_NAME
 
@@ -24,15 +24,14 @@ def login_to_new(session):
                                f"exist.\nType CREATE to make this a username, type CANCEL to try "
                                f"another name\n").upper().split()[0]
         if command == "CREATE":
-            user = user_creation(session)
+            user = user_password_creation(session)
             if not user == -1:
                 session.set_user(user)
                 return session
             else :
-                login()
+                return login()
         elif command == "CANCEL":
-            login()
-            break
+            return login()
         else :
             print("Invalid Command!")
 
@@ -81,7 +80,7 @@ def login():
         if len(name.split()[0]) > 20:
             print("Username too long!")
         else :
-            if not read_password(session):
+            if not read_passwords_data(session):
                 return login_to_new(session)
             else :
                 user = read_users(session, name)
