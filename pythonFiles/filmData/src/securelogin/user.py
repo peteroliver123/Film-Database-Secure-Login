@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from util import secure_input, secure_quit, NUMBER_PASSWORD_WRONG
 from securelogin.two_fa import two_fa_option
-from securelogin.password_security import password_checker, write_new_password, read_password
+from securelogin.password_security import password_checker, write_new_password, read_passwords_data
 from securelogin.user_classes import ExistingUserProfile
 
 
@@ -37,7 +37,7 @@ def user_password_creation(session):
             return -1
 
         if new_password == confirm_password :
-            if read_password(session):
+            if read_passwords_data(session):
                 return new_password
             else :
                 return user_creation(session, new_password)

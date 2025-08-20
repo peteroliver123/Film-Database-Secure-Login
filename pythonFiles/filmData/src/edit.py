@@ -1,5 +1,6 @@
 from util import secure_input
 
+
 def duplicate_search(session):
     while True:
         locations = secure_input("Enter any amount of locations (max 3 separated by spaces):\n").split()
@@ -30,6 +31,102 @@ def duplicate_search(session):
             else :
                 print("Too many locations!")
 
+
+def location_selector(session):
+    location = secure_input("Please enter the location, you would like to perform this operation (CANCEL to go back):\n")
+    session.get_cursor().callproc('basicLocationSearch', [location,"",""])
+    result = session.get_cursor().fetchone()
+    if result:
+        return location
+    elif location.upper() == "CANCEL":
+        return -1
+    else :
+        print("Invalid Location!")
+        return location_selector(session)
+
+
+def id_name_selector():
+    print("You can perform this operation by either id or name")
+    id_val = 0
+    name = ""
+    while True:
+        command = secure_input("Type 1 for id and type 2 for name. CANCEL to go back: \n")
+        if command == "1":
+            id_val = secure_input("Enter an id: ")
+            return id_val, name
+        elif command == "2":
+            name = secure_input("Enter film name: ")
+            return id_val, name
+        elif command == "CANCEL":
+            return -1 -1
+
+
+def rename_fun(session):
+    print("Welcome to Rename!")
+    location = location_selector(session)
+    id_val, name = id_name_selector()
+    if id_val == -1 or name == -1 or location == -1:
+        return
+    else :
+        new_name = secure_input("Enter new name for the film: ")
+
+        session.get_cursor().callproc('rename_film', [name, id_val, location, new_name])
+        results = session.get_cursor().fetchone()
+        rows_affected = results[0]
+
+        if rows_affected == 0:
+            print("Name or id invalid!")
+        else :
+            print("Name Changed Successfully!")
+        session.commit()
+
+
+def insert_fun(session):
+    print("Welcome to Insert!")
+    #Location
+    location = location_selector(session)
+
+    if location == -1:
+        return
+
+    #Id
+    session.get_cursor().callproc('count_ids', [location])
+    results = session.get_cursor().fetchone()
+    id_val = results[0] + 1
+
+    #Name
+    film_name = secure_input("Enter name for the new film: ")
+
+    #Age Rating
+    age_rating = secure_input("Enter age rating for the new film: ")
+
+    session.get_cursor().callproc('insert_film', [id_val, film_name, location, age_rating])
+    session.commit()
+    print("Inserted Film Successfully!")
+
+
+def delete_fun(session):
+    print("Welcome to Delete!")
+    #Location
+    location = location_selector(session)
+
+    #Id, Name
+    id_val, name = id_name_selector()
+
+    if id_val == -1 or name == -1 or location == -1:
+        return
+    else :
+        session.get_cursor().callproc('delete_film', [name, id_val, location])
+        results = session.get_cursor().fetchone()
+        rows_affected = results[0]
+
+        if rows_affected == 0:
+            print("Name or id invalid!")
+        else :
+            print("Deleted Film Successfully!")
+        session.commit()
+
+
 def edit_fun(session):
     print("Welcome to Edit!")
     while True:
@@ -43,16 +140,16 @@ def edit_fun(session):
                 print("INSERT = Add films")
                 print("MAIN = Return to Main Menu")
             case "RENAME":
-                pass
+                rename_fun(session)
                 break
             case "DUPLICATE":
                 duplicate_search(session)
                 break
             case "DELETE":
-                print("The DELETE functionality has not been implemented yet! Please come back later")
+                delete_fun(session)
                 break
             case "INSERT":
-                print("The INSERT functionality has not been implemented yet! Please come back later")
+                insert_fun(session)
                 break
             case "MAIN":
                 return

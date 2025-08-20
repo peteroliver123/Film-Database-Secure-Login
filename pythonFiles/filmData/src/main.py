@@ -2,10 +2,23 @@
 # My File Imports
 from securelogin.login import login
 from launch import launch
+from securelogin.user_classes import ExistingUserProfile
+from securelogin.session import CurrentSession
+from edit import delete_fun
+
+TEST = 1
+
 
 def main():
-    session = login()
-    launch(session)
+    if TEST:
+        session = CurrentSession()
+        session.open_conn()
+        fake_user = ExistingUserProfile("fake", None, False, None, 0, True)
+        session.set_user(fake_user)
+        delete_fun(session)
+    else :
+        session = login()
+        launch(session)
 
 if __name__ == "__main__":
     main()

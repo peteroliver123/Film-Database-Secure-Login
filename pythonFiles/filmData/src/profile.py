@@ -1,20 +1,26 @@
-from securelogin.password_security import read_password
+from securelogin.password_security import password_encrypter
 from securelogin.user import user_password_creation
 from util import secure_input
 from securelogin.two_fa import two_fa_option, unlock_two_fa
 
 
 def delete_accounts(session, name_to_delete):
-    result = session.get_cursor().callproc('basicNameSearch', [name_to_delete])
-    session.commit()
-    if result :
-        session.get_cursor().callproc('dropRowPassword', [name_to_delete])
-        session.commit()
-        session.get_cursor().callproc('dropRowUser', [name_to_delete])
-        session.commit()
-        print(f"Deleted {name_to_delete} successfully!")
+    session.get_cursor().callproc('readUsers', [name_to_delete])
+    result = session.get_cursor().fetchone()
+    session.get_cursor().callproc('readPasswords', [name_to_delete])
+    result2 = session.get_cursor().fetchone()
+    if result and result2:
+        if result[0] == "ADMIN":
+            print("Cannot delete ADMIN")
+        else :
+            session.get_cursor().callproc('dropRowPassword', [name_to_delete])
+            session.commit()
+            session.get_cursor().callproc('dropRowUser', [name_to_delete])
+            session.commit()
+            print(f"Deleted {name_to_delete} successfully!")
     else :
         print("Name not found")
+
 
 
 def account_into(session):
@@ -25,29 +31,32 @@ def account_into(session):
 
 
 def rename(session):
-    change_flag = False
-    while True:
-        if change_flag:
-            break
-        new_name = secure_input("Enter the username you would like to rename the active account to (CANCEL to go back):\n")
-        if new_name.upper() == "CANCEL":
-            break
+    if session.get_user().get_is_admin():
+        print("Cannot rename ADMIN!")
+    else :
+        change_flag = False
         while True:
-            confirmation = secure_input(f"Rename {session.get_user().get_user_name()} to {new_name}. Proceed (Y/N): ").upper()
-            if confirmation == "Y" or confirmation == "YES":
-                session.get_cursor().callproc('rename_user', [session.get_user().get_user_name(), new_name])
-                session.commit()
-                session.get_user().set_user_name(new_name)
-                change_flag = True
+            if change_flag:
                 break
-            elif confirmation == "N" or confirmation == "NO":
+            new_name = secure_input("Enter the username you would like to rename the active account to (CANCEL to go back):\n")
+            if new_name.upper() == "CANCEL":
                 break
+            while True:
+                confirmation = secure_input(f"Rename {session.get_user().get_user_name()} to {new_name}. Proceed (Y/N): ").upper()
+                if confirmation == "Y" or confirmation == "YES":
+                    session.get_cursor().callproc('rename_user', [session.get_user().get_user_name(), new_name])
+                    session.commit()
+                    session.get_user().set_user_name(new_name)
+                    change_flag = True
+                    break
+                elif confirmation == "N" or confirmation == "NO":
+                    break
 
 
 def reset_password(session):
+    print("Setup a New Password: ")
     new_password = user_password_creation(session)
-    old_password = read_password(session)
-    session.get_cursor().callproc('reset_password', [old_password, new_password])
+    session.get_cursor().callproc('reset_password', [session.get_user().get_user_name(), password_encrypter(new_password)])
     session.commit()
 
 
@@ -61,11 +70,14 @@ def profile_fun(session):
                 print("2FA = Turn On 2FA")
                 print("DELETE = Delete Users (ADMIN only)")
                 print("RENAME = Re-name this Account")
-                print("PASSWORD_RESET = Reset Password")
-                print("ACCOUNT_INFO = Account Info")
+                print("RESET = Reset Password")
+                print("INFO = Account Info")
                 print("MAIN = Return to Main Menu")
             case "2FA":
                 secret = two_fa_option()
+                if secret:
+                    session.get_cursor().callproc('update_two_fa', [session.get_user().get_user_name(), secret])
+                    session.commit()
                 break
             case "DELETE":
                 if session.get_user().get_is_admin() :
@@ -80,14 +92,14 @@ def profile_fun(session):
             case "RENAME":
                 rename(session)
                 break
-            case "PASSWORD_RESET":
+            case "RESET":
                 # could make this require 2fa
                 if not unlock_two_fa(session) == -1:
                     reset_password(session)
                 else :
                     print("Reset requires 2FA")
                 break
-            case "ACCOUNT_INFO":
+            case "INFO":
                 account_into(session)
                 break
             case "MAIN":
