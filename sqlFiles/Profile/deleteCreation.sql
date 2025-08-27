@@ -1,0 +1,20 @@
+/* PROCEDURES TO DELETE ROWS FROM USERS AND PASSWORDS */
+
+/* DROP PROCEDURES */
+DROP PROCEDURE IF EXISTS DropRowUser;
+DROP PROCEDURE IF EXISTS DropRowPassword;
+
+/* CREATE PROCEDURES */
+DELIMITER //
+CREATE PROCEDURE DropRowUser(IN inNameDelete VARCHAR(60))
+BEGIN
+	DELETE FROM users
+	WHERE users.username = inNameDelete;
+END //
+
+CREATE PROCEDURE DropRowPassword(IN inNameDelete VARCHAR(60))
+BEGIN
+	DELETE FROM passwords
+	WHERE passwords.username = inNameDelete;
+END //
+DELIMITER ;
