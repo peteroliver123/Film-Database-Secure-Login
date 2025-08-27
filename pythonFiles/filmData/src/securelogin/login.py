@@ -1,4 +1,3 @@
-# Standard Library Imports
 from datetime import datetime
 
 from profile import reset_password
@@ -8,7 +7,7 @@ from securelogin.session import CurrentSession
 from securelogin.two_fa import unlock_two_fa
 from securelogin.user import rewrite_user, user_password_creation, read_users, lock_account, unlock_procedures
 from securelogin.user_classes import NewUserProfile
-from util import secure_input, secure_quit, NUMBER_PASSWORD_WRONG, PROJECT_NAME
+from util import secure_input, secure_quit, write_action, NUMBER_PASSWORD_WRONG, PROJECT_NAME
 
 """
 These functions manage user login, they are the primary logic controllers of the
@@ -67,6 +66,7 @@ def login_to_old(session):
                           f"attempts remaining! Type CANCEL to try another name or enter correct password")
                 else :
                     lock_account(session)
+                    write_action(f"User {session.get_user().get_user_name()} was locked out until {session.get_user().get_date_unlock()}")
                     secure_quit(session, f"Password wrong too many times! Your "
                                          f"account has been locked until {session.get_user().get_date_unlock()}")
 

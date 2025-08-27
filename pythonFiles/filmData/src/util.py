@@ -1,3 +1,6 @@
+# Imports
+from datetime import datetime
+
 # Constants #
 NUMBER_PASSWORD_WRONG = 3
 PROJECT_NAME = "Film Manager 2.0"
@@ -13,3 +16,7 @@ def secure_input(prompt):
     while output == "":
         output = input(prompt).strip()
     return output
+
+def write_action(action_performed):
+    with open("../files/log.txt", "a") as file:
+        file.write(f"{datetime.now()} : {action_performed}\n")
