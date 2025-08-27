@@ -3,16 +3,16 @@ from util import secure_input
 def basic_search(array_params, array_bools, session):
     is_film, is_age, is_id, is_location = array_bools
     if is_film:
-        session.get_cursor().callproc('basicNameSearch', array_params[0])
+        session.get_cursor().callproc('BasicNameSearch', array_params[0])
         session.print_results()
     elif is_age:
-        session.get_cursor().callproc('basicAgeSearch', array_params[1])
+        session.get_cursor().callproc('BasicAgeSearch', array_params[1])
         session.print_results()
     elif is_id:
-        session.get_cursor().callproc('basicIdSearch', array_params[2])
+        session.get_cursor().callproc('BasicIdSearch', array_params[2])
         session.print_results()
     elif is_location:
-        session.get_cursor().callproc('basicLocationSearch', array_params[3])
+        session.get_cursor().callproc('BasicLocationSearch', array_params[3])
         session.print_results()
     else :
         print("An Unrecoverable Error Occurred!")
@@ -20,22 +20,22 @@ def basic_search(array_params, array_bools, session):
 def double_search(array_params, array_bools, session):
     is_film, is_age, is_id, is_location = array_bools
     if is_id and is_location:
-        session.get_cursor().callproc('idLocationSearch', array_params[2] + array_params[3])
+        session.get_cursor().callproc('IdLocationSearch', array_params[2] + array_params[3])
         session.print_results()
     elif is_id and is_age:
-        session.get_cursor().callproc('idAgeSearch', array_params[2] + array_params[1])
+        session.get_cursor().callproc('IdAgeSearch', array_params[2] + array_params[1])
         session.print_results()
     elif is_id and is_film:
-        session.get_cursor().callproc('idNameSearch', array_params[2] + array_params[0])
+        session.get_cursor().callproc('IdNameSearch', array_params[2] + array_params[0])
         session.print_results()
     elif is_film and is_location:
-        session.get_cursor().callproc('nameLocationSearch', array_params[0] + array_params[3])
+        session.get_cursor().callproc('NameLocationSearch', array_params[0] + array_params[3])
         session.print_results()
     elif is_film and is_age:
-        session.get_cursor().callproc('nameAgeSearch', array_params[0] + array_params[1])
+        session.get_cursor().callproc('NameAgeSearch', array_params[0] + array_params[1])
         session.print_results()
     elif is_location and is_age:
-        session.get_cursor().callproc('locationAgeSearch', array_params[3] + array_params[1])
+        session.get_cursor().callproc('LocationAgeSearch', array_params[3] + array_params[1])
         session.print_results()
     else :
         print("An Unrecoverable Error Occurred!")
@@ -43,16 +43,16 @@ def double_search(array_params, array_bools, session):
 def triple_search(array_params, array_bools, session):
     is_film, is_age, is_id, is_location = array_bools
     if is_id and is_location and is_age:
-        session.get_cursor().callproc('idLocationAgeSearch', array_params[2] + array_params[3] + array_params[1])
+        session.get_cursor().callproc('IdLocationAgeSearch', array_params[2] + array_params[3] + array_params[1])
         session.print_results()
     elif is_id and is_film and is_age:
-        session.get_cursor().callproc('idNameAgeSearch', array_params[2] + array_params[0] + array_params[1])
+        session.get_cursor().callproc('IdNameAgeSearch', array_params[2] + array_params[0] + array_params[1])
         session.print_results()
     elif is_id and is_film and is_location:
-        session.get_cursor().callproc('idNameLocationSearch', array_params[2] + array_params[0] + array_params[3])
+        session.get_cursor().callproc('IdNameLocationSearch', array_params[2] + array_params[0] + array_params[3])
         session.print_results()
     elif is_film and is_location and is_age:
-        session.get_cursor().callproc('nameLocationAgeSearch', array_params[0] + array_params[3] + array_params[1])
+        session.get_cursor().callproc('NameLocationAgeSearch', array_params[0] + array_params[3] + array_params[1])
         session.print_results()
     else :
         print("An Unrecoverable Error Occurred!")
@@ -60,7 +60,7 @@ def triple_search(array_params, array_bools, session):
 def grand_slam_search(array_params, array_bools, session):
     is_film, is_age, is_id, is_location = array_bools
     if is_id and is_film and is_location and is_age:
-        session.get_cursor().callproc('idNameLocationAgeSearch', array_params[2] + array_params[0] + array_params[3] + array_params[1])
+        session.get_cursor().callproc('IdNameLocationAgeSearch', array_params[2] + array_params[0] + array_params[3] + array_params[1])
         session.print_results()
 
 def get_bools(array_params):
@@ -79,7 +79,7 @@ def launch_search(array_params, array_bools, counter, session):
     match counter:
         case 0 :
             # Get All Films
-            session.get_cursor().callproc('getAll')
+            session.get_cursor().callproc('GetAll')
             session.print_results()
         case 1 :
             # Search with one parameter
@@ -110,13 +110,28 @@ def search_fun(session):
     if age_rating :
         while len(age_rating) < 7:
             age_rating.append("")
+        if len(age_rating) > 7:
+            return
+        for a in age_rating:
+            if len(a) > 10:
+                return
     if location :
         while len(location) < 3:
             location.append("")
+        if len(location) > 3:
+            return
+        for l in location:
+            if len(l) > 20:
+                return
     if film_name:
+        if len(film_name) > 100:
+            return
         film_name = [film_name]
     if id_number:
+        if len(id_number) > 20:
+            return
         id_number = [id_number]
+
 
     print(f"You entered:\n{film_name}\n{age_rating}\n{id_number}\n{location}")
     while True :

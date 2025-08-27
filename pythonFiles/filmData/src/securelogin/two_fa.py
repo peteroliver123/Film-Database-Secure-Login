@@ -1,6 +1,6 @@
 import pyotp
 import qrcode
-from util import secure_input
+from util import secure_input, secure_quit
 from securelogin.password_security import read_two_fa
 
 
@@ -33,6 +33,8 @@ def two_fa_option():
 
 def two_fa_setup():
     user_email = secure_input("Enter your email address: ")
+    if len(user_email) > 65:
+        secure_quit(None, "User attempted to break system!")
     secret = pyotp.random_base32()
     totp = pyotp.TOTP(secret)
     uri = totp.provisioning_uri(name=user_email, issuer_name="GoogleAuthenticator")

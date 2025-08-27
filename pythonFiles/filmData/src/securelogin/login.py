@@ -1,11 +1,12 @@
 # Standard Library Imports
 from datetime import datetime
 
+from profile import reset_password
 # Local Imports
 from securelogin.password_security import do_passwords_match, read_passwords_data
 from securelogin.session import CurrentSession
 from securelogin.two_fa import unlock_two_fa
-from securelogin.user import rewrite_user, user_password_creation, read_users, unlock_procedures, lock_account
+from securelogin.user import rewrite_user, user_password_creation, read_users, lock_account, unlock_procedures
 from securelogin.user_classes import NewUserProfile
 from util import secure_input, secure_quit, NUMBER_PASSWORD_WRONG, PROJECT_NAME
 
@@ -42,6 +43,7 @@ def login_to_old(session):
             result = unlock_two_fa(session)
             if not result == -1:
                 unlock_procedures(session)
+                reset_password(session)
                 return login()
             else :
                 secure_quit(None, "You are locked out!")
@@ -58,10 +60,10 @@ def login_to_old(session):
                 print("Password Correct!")
                 return session
             else :
-                session.get_user().increment_num_fails()
+                session.get_user().increment_failed_entry()
                 rewrite_user(session)
-                if session.get_user().get_num_fails() < NUMBER_PASSWORD_WRONG:
-                    print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - session.get_user().get_num_fails()} "
+                if session.get_user().get_failed_entry() < NUMBER_PASSWORD_WRONG:
+                    print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - session.get_user().get_failed_entry()} "
                           f"attempts remaining! Type CANCEL to try another name or enter correct password")
                 else :
                     lock_account(session)
@@ -73,6 +75,8 @@ def login():
     while True:
         print(f"\nHello! Welcome to {PROJECT_NAME}! Login to continue\n")
         name = secure_input("Enter Username: ")
+        if len(name) > 60:
+            secure_quit(None, "User attempted to break the system!")
         session = CurrentSession()
         session.open_conn()
         new_user = NewUserProfile(name, datetime.now())

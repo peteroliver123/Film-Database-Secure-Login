@@ -4,7 +4,6 @@ from util import secure_input
 def duplicate_search(session):
     while True:
         locations = secure_input("Enter any amount of locations (max 3 separated by spaces):\n").split()
-
         # Validity Check #
         valid_locations = ["KITCHEN", "LOUNGE", "ATTIC"]
         location_error = False
@@ -21,11 +20,11 @@ def duplicate_search(session):
             if len(locations) == 1:
                 print("Too few locations!")
             elif len(locations) == 2:
-                session.get_cursor().callproc('passTwoTableNames', (locations[0], locations[1]))
+                session.get_cursor().callproc('PassTwoTableNames', (locations[0], locations[1]))
                 session.print_results()
                 break
             elif len(locations) == 3:
-                session.get_cursor().callproc('passThreeTableNames', (locations[0], locations[1], locations[2]))
+                session.get_cursor().callproc('PassThreeTableNames', (locations[0], locations[1], locations[2]))
                 session.print_results()
                 break
             else :
@@ -34,7 +33,9 @@ def duplicate_search(session):
 
 def location_selector(session):
     location = secure_input("Please enter the location, you would like to perform this operation (CANCEL to go back):\n")
-    session.get_cursor().callproc('basicLocationSearch', [location,"",""])
+    session.get_cursor().callproc('BasicLocationSearch', [location,"",""])
+    if len(location) > 20:
+        return -1
     result = session.get_cursor().fetchone()
     if result:
         return location
@@ -53,9 +54,13 @@ def id_name_selector():
         command = secure_input("Type 1 for id and type 2 for name. CANCEL to go back: \n")
         if command == "1":
             id_val = secure_input("Enter an id: ")
+            if len(id_val) > 20:
+                return -1 -1
             return id_val, name
         elif command == "2":
             name = secure_input("Enter film name: ")
+            if len(name) > 80:
+                return -1 -1
             return id_val, name
         elif command == "CANCEL":
             return -1 -1
@@ -70,7 +75,7 @@ def rename_fun(session):
     else :
         new_name = secure_input("Enter new name for the film: ")
 
-        session.get_cursor().callproc('rename_film', [name, id_val, location, new_name])
+        session.get_cursor().callproc('RenameFilm', [name, id_val, location, new_name])
         results = session.get_cursor().fetchone()
         rows_affected = results[0]
 
@@ -90,7 +95,7 @@ def insert_fun(session):
         return
 
     #Id
-    session.get_cursor().callproc('count_ids', [location])
+    session.get_cursor().callproc('CountIds', [location])
     results = session.get_cursor().fetchone()
     id_val = results[0] + 1
 
@@ -100,7 +105,7 @@ def insert_fun(session):
     #Age Rating
     age_rating = secure_input("Enter age rating for the new film: ")
 
-    session.get_cursor().callproc('insert_film', [id_val, film_name, location, age_rating])
+    session.get_cursor().callproc('InsertFilm', [id_val, film_name, location, age_rating])
     session.commit()
     print("Inserted Film Successfully!")
 
@@ -116,7 +121,7 @@ def delete_fun(session):
     if id_val == -1 or name == -1 or location == -1:
         return
     else :
-        session.get_cursor().callproc('delete_film', [name, id_val, location])
+        session.get_cursor().callproc('DeleteFilm', [name, id_val, location])
         results = session.get_cursor().fetchone()
         rows_affected = results[0]
 

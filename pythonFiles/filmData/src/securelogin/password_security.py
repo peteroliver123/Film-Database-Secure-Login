@@ -1,10 +1,10 @@
 # Third Party Imports
 import bcrypt
 
-
+#software that changes code from one convention to another
 #Function to write to password table
 def write_new_password(session, new_password, secret):
-    session.get_cursor().callproc('insertPassword', [session.get_user().get_user_name(),
+    session.get_cursor().callproc('InsertPassword', [session.get_user().get_user_name(),
                                                      password_encrypter(new_password), secret])
     session.commit()
 
@@ -18,7 +18,7 @@ def password_encrypter(plain_password):
 
 # Functions to read password table
 def read_passwords_data(session):
-    session.get_cursor().callproc('readPasswords', [session.get_user().get_user_name()])
+    session.get_cursor().callproc('ReadPasswords', [session.get_user().get_user_name()])
     results = session.get_cursor().fetchone()
     return results
 
@@ -33,14 +33,19 @@ def read_password(session):
 
 # Function to check if given password matches stored
 def do_passwords_match(session, entered_password):
-    encrypted_password = read_password(session).encode('utf-8')
-    check_password = entered_password.encode('utf-8')
+    try :
+        encrypted_password = read_password(session).encode('utf-8')
+        check_password = entered_password.encode('utf-8')
 
-    if bcrypt.checkpw(check_password, encrypted_password):
-        return True
-    else:
+        if bcrypt.checkpw(check_password, encrypted_password):
+            return True
+        else:
+            return False
+    except ValueError:
+        # Forced Lockout
+        while session.get_user().get_num_lockout() < 2:
+            session.get_user().increment_num_lockout()
         return False
-
 
 #Function to check password strength
 def password_checker(password):
@@ -79,6 +84,10 @@ def password_checker(password):
     # check if password contains digit
     if not has_digit :
         print("Password must contain a digit")
+        failure = True
+
+    if len(password_encrypter(password)) > 100 or len(password) > 100:
+        print("Invalid Password!")
         failure = True
 
     return failure

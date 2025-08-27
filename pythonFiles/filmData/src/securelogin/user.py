@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 
 from util import secure_input, secure_quit, NUMBER_PASSWORD_WRONG
@@ -9,17 +8,17 @@ from securelogin.user_classes import ExistingUserProfile
 
 #This function reads the users file, and returns -1 if user not found
 def read_users(session, user_name):
-    session.get_cursor().callproc('readUsers', [user_name])
+    session.get_cursor().callproc('ReadUsers', [user_name])
     results = session.get_cursor().fetchone()
     if not results:
         return -1
     else :
-        name, date_created, is_locked, date_unlock, num_fails, is_admin = results
+        name, date_created, is_locked, date_unlock, num_lockout, is_admin, failed_entry = results
         is_locked = is_locked == "True"
-        num_fails = int(num_fails)
+        num_lockout = int(num_lockout)
         is_admin = is_admin == "True"
         return ExistingUserProfile(name, date_created, is_locked,
-                                   date_unlock, num_fails, is_admin)
+                                   date_unlock, num_lockout, is_admin, failed_entry)
 
 
 #This function creates a new user
@@ -57,7 +56,7 @@ def user_creation(session, new_password):
 
 
 def rewrite_user(session):
-    result = session.get_cursor().callproc('dropRowUser', [session.get_user().get_user_name()])
+    result = session.get_cursor().callproc('DropRowUser', [session.get_user().get_user_name()])
     session.commit()
     if result :
         write_new_user(session)
@@ -73,17 +72,34 @@ def write_new_user(session):
         is_locked = "False"
     date_unlock = session.get_user().get_date_unlock()
     date_created = session.get_user().get_date_created()
-    session.get_cursor().callproc('insertUser', [session.get_user().get_user_name(),
+    is_admin = session.get_user().get_is_admin()
+    if is_admin :
+        is_admin = "True"
+    else :
+        is_admin = "False"
+    session.get_cursor().callproc('InsertUser', [session.get_user().get_user_name(),
                                                  date_created, is_locked, date_unlock,
-                                                 session.get_user().get_num_fails()])
+                                                 session.get_user().get_num_lockout(),
+                                                 is_admin, session.get_user().get_failed_entry()])
     session.commit()
-
 
 # LOCKING PROCEDURES #
 def lock_account(session):
     session.get_user().flip_locked()
-    session.get_user().set_date_unlock(datetime.now() + timedelta(days=1))
-    session.get_user().reset_num_fails()
+
+    # Exponential Lockout Logic #
+    if session.get_user().get_num_lockout() >= 10:
+        session.get_user().set_date_unlock(datetime.now() + timedelta(days = 32))
+    elif session.get_user().get_num_lockout() >= 5:
+        incremental = pow(2, session.get_user().get_num_lockout() - 5)
+        session.get_user().set_date_unlock(datetime.now() + timedelta(days = incremental))
+    else :
+        incremental = pow(2, session.get_user().get_num_lockout())
+        session.get_user().set_date_unlock(datetime.now() + timedelta(hours = incremental))
+
+    if session.get_user().get_num_lockout() < 1000:
+        session.get_user().increment_num_lockout()
+    session.get_user().reset_failed_entry()
     #rewrite file
     rewrite_user(session)
 
