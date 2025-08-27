@@ -4,6 +4,7 @@ from util import secure_input, secure_quit, NUMBER_PASSWORD_WRONG
 from securelogin.two_fa import two_fa_option
 from securelogin.password_security import password_checker, write_new_password, read_passwords_data
 from securelogin.user_classes import ExistingUserProfile
+from util import write_action
 
 
 #This function reads the users file, and returns -1 if user not found
@@ -17,6 +18,7 @@ def read_users(session, user_name):
         is_locked = is_locked == "True"
         num_lockout = int(num_lockout)
         is_admin = is_admin == "True"
+        write_action(f"User {session.get_user().get_user_name()} read from file successfully")
         return ExistingUserProfile(name, date_created, is_locked,
                                    date_unlock, num_lockout, is_admin, failed_entry)
 
@@ -45,6 +47,7 @@ def user_password_creation(session):
             if password_count == 0:
                 secure_quit(None, "Passwords didn't match too many times!")
             print(f"Passwords didn't match! {password_count} attempts remaining!")
+            write_action(f"User {session.get_user().get_user_name()} failed to match passwords when creating account")
 
 
 def user_creation(session, new_password):
@@ -52,6 +55,7 @@ def user_creation(session, new_password):
     write_new_password(session, new_password, secret)
     write_new_user(session)
     print("New Account Created!")
+    write_action(f"User {session.get_user().get_user_name()} created as new account")
     return session.get_user()
 
 
@@ -82,6 +86,7 @@ def write_new_user(session):
                                                  session.get_user().get_num_lockout(),
                                                  is_admin, session.get_user().get_failed_entry()])
     session.commit()
+    write_action(f"User file changed")
 
 # LOCKING PROCEDURES #
 def lock_account(session):

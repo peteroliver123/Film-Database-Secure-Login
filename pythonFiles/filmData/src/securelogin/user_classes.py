@@ -1,8 +1,6 @@
 # Built-In Imports
 from datetime import datetime
 
-from util import secure_quit
-
 
 class UserProfile:
 
@@ -10,11 +8,7 @@ class UserProfile:
     def __init__(self, user_name, date_created):
         # Instantiated Variables #
         self.user_name = user_name
-        if self.user_name is None:
-            secure_quit(None, "Something nefarious is occurring!")
         self.date_created = date_created
-        if self.date_created is None:
-            secure_quit(None, "Something nefarious is occurring!")
         # Default Variables #
         self.is_locked = False
         self.date_unlock = date_created

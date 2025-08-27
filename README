@@ -1,1 +1,36 @@
 # FilmDatabase 
+Welcome to Film Database here are the instructions to get up and running
+
+STEP 1:
+Have a fully functional SQL database up and running. Recommended SQL Workbench.
+
+STEP 2:
+Download file record_boxes.sql from the WHOLE_SCHEMA folder in the sqlFiles folder.
+Run this SQL script to load tables and procedures required. Note the password to your connection
+
+STEP 3:
+Clone the repository. Coded in IntelliJ IDEA so this is recommended.
+Use clone from version control option. Make src folder the sources root. In
+file session.py go to the open_conn function and insert your password to your
+SQL connection there. Note an ADMIN user will already be pre-populated, the
+default password for this account is Password123!.
+
+STEP 4:
+Click File -> Project Structure -> SDKs (under Platform Settings)
+Click + (top left)
+Select add python SDK from disk (this assumes you already have python plugin for IntelliJ installed)
+Select ok
+Hit apply and ok
+
+Step 5:
+Click File -> Project Structure -> Modules (under Project Settings)
+Click + (top left)
+Select Python
+Select Python interpreter for current project name
+
+Step 5:
+Hit terminal in left sidebar
+Type pip install pymysql
+
+Step 6:
+Program should now run from main.py

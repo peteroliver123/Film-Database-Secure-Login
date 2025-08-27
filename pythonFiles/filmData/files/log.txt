@@ -1,2 +1,51 @@
-2025-08-27 15:35:33.276961 : User Cassie was locked out until 2025-08-27 16:35:33.270898
-2025-08-27 15:35:45.377725 : User Peter2 was locked out until 2025-08-27 16:35:45.373669
+2025-08-27 19:59:59.464755 : User successfully triggered 2fa setup
+2025-08-27 19:59:59.880779 : User file changed
+2025-08-27 19:59:59.881739 : User Peter created as new account
+2025-08-27 20:01:07.835360 : User Peter read from file successfully
+2025-08-27 20:01:10.602525 : User Peter entered password correctly
+2025-08-27 20:01:13.711617 : User Peter logged out
+2025-08-27 20:01:26.480093 : User Peter read from file successfully
+2025-08-27 20:01:29.541989 : User Peter entered password correctly
+2025-08-27 20:01:36.146532 : User Peter logged out
+2025-08-27 20:01:40.937359 : User Peter read from file successfully
+2025-08-27 20:01:41.864586 : User Peter entered a password incorrectly
+2025-08-27 20:01:41.888394 : User file changed
+2025-08-27 20:01:42.398427 : User Peter entered a password incorrectly
+2025-08-27 20:01:42.406056 : User file changed
+2025-08-27 20:01:43.537608 : User Peter entered a password incorrectly
+2025-08-27 20:01:43.548100 : User file changed
+2025-08-27 20:01:43.555185 : User file changed
+2025-08-27 20:01:43.555185 : User Peter was locked out until 2025-08-27 21:01:43.548100
+2025-08-27 20:01:50.425227 : User Peter read from file successfully
+2025-08-27 20:01:50.425227 : User Peter attempted to unlock account
+2025-08-27 20:01:50.428245 : User Peter failed to unlock account
+2025-08-27 20:01:59.106786 : User Peter read from file successfully
+2025-08-27 20:02:00.188891 : User Peter entered a password incorrectly
+2025-08-27 20:02:00.208772 : User file changed
+2025-08-27 20:02:01.124692 : User Peter  entered a password incorrectly
+2025-08-27 20:02:01.138451 : User file changed
+2025-08-27 20:02:01.900666 : User Peter entered a password incorrectly
+2025-08-27 20:02:01.914937 : User file changed
+2025-08-27 20:02:01.924913 : User file changed
+2025-08-27 20:02:01.924913 : User Peter was locked out until 2025-08-27 21:02:01.914937
+2025-08-27 20:02:07.457671 : User Peter read from file successfully
+2025-08-27 20:02:07.458651 : User Peter attempted to unlock account
+2025-08-27 20:02:11.469350 : User Peter successfully verified 2fa
+2025-08-27 20:02:11.485355 : User file changed
+2025-08-27 20:02:20.051751 : User Peter successfully unlocked account by 2fa
+2025-08-27 20:05:27.967907 : User ADMIN read from file successfully
+2025-08-27 20:05:30.908197 : User ADMIN entered a password incorrectly
+2025-08-27 20:05:30.925629 : User file changed
+2025-08-27 20:06:02.153376 : User ADMIN entered a password incorrectly
+2025-08-27 20:06:02.190819 : User file changed
+2025-08-27 20:06:04.518366 : User ADMIN entered a password incorrectly
+2025-08-27 20:06:04.534571 : User file changed
+2025-08-27 20:06:04.549242 : User file changed
+2025-08-27 20:06:04.550149 : User ADMIN was locked out until 2025-08-28 00:06:04.534571
+2025-08-27 20:07:41.148741 : User ADMIN read from file successfully
+2025-08-27 20:07:41.148741 : User ADMIN attempted to unlock account
+2025-08-27 20:07:41.151971 : User ADMIN failed to unlock account
+2025-08-27 20:08:43.991931 : User Admin read from file successfully
+2025-08-27 20:08:47.568968 : User ADMIN entered password correctly
+2025-08-27 20:09:10.905588 : User successfully triggered 2fa setup
+2025-08-27 20:09:23.548509 : User ADMIN logged out

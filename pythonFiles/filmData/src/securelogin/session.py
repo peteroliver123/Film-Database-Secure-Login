@@ -25,7 +25,7 @@ class CurrentSession:
 
     def open_conn(self):
         self.conn = pymysql.connect(host="localhost", user="root",
-                                    password="Founders72!", database="record_boxes")
+                                    password="INSERTURPASSWORDHERE", database="record_boxes")
         self.cursor = self.conn.cursor()
 
     def close_conn(self):

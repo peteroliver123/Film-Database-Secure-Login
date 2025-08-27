@@ -1,6 +1,6 @@
 from securelogin.password_security import password_encrypter, read_two_fa
 from securelogin.user import user_password_creation
-from util import secure_input, NUMBER_PASSWORD_WRONG
+from util import secure_input, NUMBER_PASSWORD_WRONG, write_action
 from securelogin.two_fa import two_fa_option, unlock_two_fa
 
 
@@ -12,18 +12,21 @@ def delete_accounts(session, name_to_delete):
     if result and result2:
         if result[0] == "ADMIN":
             print("Cannot delete ADMIN")
+            write_action(f"User {session.get_user().get_user_name()} attempted to delete ADMIN")
         else :
             session.get_cursor().callproc('DropRowPassword', [name_to_delete])
             session.commit()
             session.get_cursor().callproc('DropRowUser', [name_to_delete])
             session.commit()
             print(f"Deleted {name_to_delete} successfully!")
+            write_action(f"User {session.get_user().get_user_name()} deleted {name_to_delete} successfully")
     else :
         print("Name not found")
-
+        write_action(f"User {session.get_user().get_user_name()} tried to delete an account that didn't exist")
 
 
 def account_into(session):
+    write_action(f"User {session.get_user().get_user_name()} read account info")
     session.get_cursor().callproc('ReadUsers', [session.get_user().get_user_name()])
     results = session.get_cursor().fetchone()
     print(f"Username: {results[0]}, Date Created: {results[1]}, "
@@ -34,6 +37,7 @@ def account_into(session):
 def rename(session):
     if session.get_user().get_is_admin():
         print("Cannot rename ADMIN!")
+        write_action(f"User {session.get_user().get_user_name()} attempted to rename ADMIN")
     else :
         change_flag = False
         while True:
@@ -49,6 +53,7 @@ def rename(session):
                     session.commit()
                     session.get_user().set_user_name(new_name)
                     change_flag = True
+                    write_action(f"User {session.get_user().get_user_name()} renamed to {new_name}")
                     break
                 elif confirmation == "N" or confirmation == "NO":
                     break
@@ -59,6 +64,7 @@ def reset_password(session):
     new_password = user_password_creation(session)
     session.get_cursor().callproc('ResetPassword', [session.get_user().get_user_name(), password_encrypter(new_password)])
     session.commit()
+    write_action(f"User {session.get_user().get_user_name()} successfully reset their password")
 
 
 def profile_fun(session):

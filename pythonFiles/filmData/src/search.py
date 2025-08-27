@@ -1,4 +1,4 @@
-from util import secure_input
+from util import secure_input, write_action
 
 def basic_search(array_params, array_bools, session):
     is_film, is_age, is_id, is_location = array_bools
@@ -76,6 +76,7 @@ def get_bools(array_params):
 
 
 def launch_search(array_params, array_bools, counter, session):
+    write_action(f"User {session.get_user().get_user_name()} launched a search")
     match counter:
         case 0 :
             # Get All Films

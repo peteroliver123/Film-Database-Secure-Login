@@ -1,6 +1,6 @@
 import pyotp
 import qrcode
-from util import secure_input, secure_quit
+from util import secure_input, secure_quit, write_action
 from securelogin.password_security import read_two_fa
 
 
@@ -12,6 +12,7 @@ def unlock_two_fa(session):
         totp = pyotp.TOTP(secret)
         if totp.verify(user_otp):
             print("2FA correct!")
+            write_action(f"User {session.get_user().get_user_name()} successfully verified 2fa")
             return 1
         else:
             print("Invalid 2FA code.")
@@ -34,6 +35,7 @@ def two_fa_option():
 def two_fa_setup():
     user_email = secure_input("Enter your email address: ")
     if len(user_email) > 65:
+        write_action(f"User attempted to enter email that would break the system")
         secure_quit(None, "User attempted to break system!")
     secret = pyotp.random_base32()
     totp = pyotp.TOTP(secret)
@@ -41,4 +43,5 @@ def two_fa_setup():
     img = qrcode.make(uri)
     img.show()
     print("Scan the QR code in the GoogleAuthenticator App to finish setup")
+    write_action(f"User successfully triggered 2fa setup")
     return secret

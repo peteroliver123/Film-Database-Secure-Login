@@ -38,15 +38,19 @@ def login_to_new(session):
 
 def login_to_old(session):
     if session.get_user().get_is_locked() :
+        write_action(f"User {session.get_user().get_user_name()} attempted to unlock account")
         if session.get_user().unlock_valid() == -1:
             result = unlock_two_fa(session)
             if not result == -1:
                 unlock_procedures(session)
                 reset_password(session)
+                write_action(f"User {session.get_user().get_user_name()} successfully unlocked account by 2fa")
                 return login()
             else :
+                write_action(f"User {session.get_user().get_user_name()} failed to unlock account")
                 secure_quit(None, "You are locked out!")
         else :
+            write_action(f"User {session.get_user().get_user_name()} successfully unlocked account by time")
             unlock_procedures(session)
             return login()
 
@@ -57,9 +61,11 @@ def login_to_old(session):
                 return login()
             elif do_passwords_match(session, password):
                 print("Password Correct!")
+                write_action(f"User {session.get_user().get_user_name()} entered password correctly")
                 return session
             else :
                 session.get_user().increment_failed_entry()
+                write_action(f"User {session.get_user().get_user_name()} entered a password incorrectly")
                 rewrite_user(session)
                 if session.get_user().get_failed_entry() < NUMBER_PASSWORD_WRONG:
                     print(f"Password Incorrect! {NUMBER_PASSWORD_WRONG - session.get_user().get_failed_entry()} "
@@ -76,6 +82,7 @@ def login():
         print(f"\nHello! Welcome to {PROJECT_NAME}! Login to continue\n")
         name = secure_input("Enter Username: ")
         if len(name) > 60:
+            write_action(f"User attempted to break the system by entering long name")
             secure_quit(None, "User attempted to break the system!")
         session = CurrentSession()
         session.open_conn()
@@ -89,6 +96,7 @@ def login():
             else :
                 user = read_users(session, name)
                 if user == -1:
+                    write_action(f"User {session.get_user().get_user_name()} caused user data incomplete error")
                     secure_quit(session, "User Data Incomplete!")
                 else :
                     session.set_user(user)

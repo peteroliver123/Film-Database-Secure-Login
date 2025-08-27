@@ -1,4 +1,4 @@
-from util import secure_quit, secure_input
+from util import secure_quit, secure_input, write_action
 from edit import edit_fun
 from search import search_fun
 from profile import profile_fun
@@ -20,6 +20,7 @@ def command_handler(command, session):
                 profile_fun(session)
                 break
             case "LOGOUT":
+                write_action(f"User {session.get_user().get_user_name()} logged out")
                 secure_quit(session, "User logged out!")
                 break
             case _:
@@ -33,6 +34,7 @@ def main_menu(session):
 
 def launch(session):
     if session is None:
+        write_action(f"A strange error occurred. Session had value {session}")
         secure_quit(session, "A strange error occurred. No session")
     print("Logging you in ...")
     print("Current User is " + session.get_user().get_user_name())

@@ -1,4 +1,4 @@
-from util import secure_input
+from util import secure_input, write_action
 
 
 def duplicate_search(session):
@@ -29,6 +29,7 @@ def duplicate_search(session):
                 break
             else :
                 print("Too many locations!")
+    write_action(f"User {session.get_user().get_user_name()} looked up duplicates")
 
 
 def location_selector(session):
@@ -84,6 +85,7 @@ def rename_fun(session):
         else :
             print("Name Changed Successfully!")
         session.commit()
+        write_action(f"User {session.get_user().get_user_name()} renamed a film")
 
 
 def insert_fun(session):
@@ -108,6 +110,7 @@ def insert_fun(session):
     session.get_cursor().callproc('InsertFilm', [id_val, film_name, location, age_rating])
     session.commit()
     print("Inserted Film Successfully!")
+    write_action(f"User {session.get_user().get_user_name()} inserted a film")
 
 
 def delete_fun(session):
@@ -130,6 +133,7 @@ def delete_fun(session):
         else :
             print("Deleted Film Successfully!")
         session.commit()
+        write_action(f"User {session.get_user().get_user_name()} deleted film")
 
 
 def edit_fun(session):
