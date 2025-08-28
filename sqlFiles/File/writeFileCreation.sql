@@ -6,7 +6,7 @@ DROP PROCEDURE IF EXISTS InsertPassword;
 
 /* CREATE PROCEDURES */
 DELIMITER //
-CREATE PROCEDURE InsertUser(In inUsername VARCHAR(60), IN inDateCreated DATETIME(6), In inIsLocked VARCHAR(10), IN inDateUnlock DATETIME(6), In inNumLockouts INT, IN inIsAdmin VARCHAR(10), IN inFailedEntry Int)
+CREATE PROCEDURE InsertUser(In inUsername VARCHAR(60), IN inDateCreated DATETIME(6), In inIsLocked BOOLEAN, IN inDateUnlock DATETIME(6), In inNumLockouts INT, IN inIsAdmin BOOLEAN, IN inFailedEntry Int)
 BEGIN
 	INSERT INTO users
 	(username, date_created, is_locked, date_unlock, num_lockouts, is_admin, failed_entry)

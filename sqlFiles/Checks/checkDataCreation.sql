@@ -25,13 +25,13 @@ DROP CHECK check_lounge;
 ALTER TABLE users
 ADD CONSTRAINT check_dates
 CHECK (
-	is_locked = "True" OR date_created = date_unlock
+	is_locked = TRUE OR date_created = date_unlock
 );
 
 ALTER TABLE users
 ADD CONSTRAINT check_is_locked
 CHECK (
-	is_locked = "True" OR is_locked = "False"
+	is_locked = TRUE OR is_locked = FALSE
 );
 
 ALTER TABLE users
@@ -43,7 +43,7 @@ CHECK (
 ALTER TABLE users
 ADD CONSTRAINT check_admin
 CHECK (
-	username = "ADMIN" AND is_admin = "True" OR is_admin = "False"
+	username = "ADMIN" AND is_admin = TRUE OR is_admin = FALSE
 );
 
 ALTER TABLE users

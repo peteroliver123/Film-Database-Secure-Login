@@ -15,9 +15,9 @@ def read_users(session, user_name):
         return -1
     else :
         name, date_created, is_locked, date_unlock, num_lockout, is_admin, failed_entry = results
-        is_locked = is_locked == "True"
+        is_locked = int(is_locked)
         num_lockout = int(num_lockout)
-        is_admin = is_admin == "True"
+        is_admin = int(is_admin)
         write_action(f"User {session.get_user().get_user_name()} read from file successfully")
         return ExistingUserProfile(name, date_created, is_locked,
                                    date_unlock, num_lockout, is_admin, failed_entry)
@@ -69,22 +69,17 @@ def rewrite_user(session):
 
 
 def write_new_user(session):
+    username = session.get_user().get_user_name()
     is_locked = session.get_user().get_is_locked()
-    if is_locked :
-        is_locked = "True"
-    else :
-        is_locked = "False"
     date_unlock = session.get_user().get_date_unlock()
+    num_lockouts = session.get_user().get_num_lockout()
     date_created = session.get_user().get_date_created()
     is_admin = session.get_user().get_is_admin()
-    if is_admin :
-        is_admin = "True"
-    else :
-        is_admin = "False"
-    session.get_cursor().callproc('InsertUser', [session.get_user().get_user_name(),
-                                                 date_created, is_locked, date_unlock,
-                                                 session.get_user().get_num_lockout(),
-                                                 is_admin, session.get_user().get_failed_entry()])
+    failed_entry = session.get_user().get_failed_entry()
+    session.get_cursor().callproc('InsertUser', [username,
+                                                 date_created, is_locked,
+                                                 date_unlock, num_lockouts,
+                                                 is_admin, failed_entry])
     session.commit()
     write_action(f"User file changed")
 

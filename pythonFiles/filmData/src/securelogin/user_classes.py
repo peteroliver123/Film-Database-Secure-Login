@@ -10,10 +10,10 @@ class UserProfile:
         self.user_name = user_name
         self.date_created = date_created
         # Default Variables #
-        self.is_locked = False
+        self.is_locked = 0
         self.date_unlock = date_created
         self.num_lockout = 0
-        self.is_admin = False
+        self.is_admin = 0
         self.failed_entry = 0
 
     # GETTER Methods #
@@ -43,7 +43,10 @@ class UserProfile:
         self.user_name = new_name
 
     def flip_locked(self):
-        self.is_locked = self.is_locked == False
+        if self.is_locked:
+            self.is_locked -= 1
+        else :
+            self.is_locked += 1
 
     def set_date_unlock(self, date_time):
         self.date_unlock = date_time

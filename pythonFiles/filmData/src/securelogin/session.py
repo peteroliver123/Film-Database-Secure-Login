@@ -1,5 +1,7 @@
 import pymysql
 
+from util import secure_quit
+
 """
 CurrentSession class manages the current state. Which User is logged in
 and whether they are ADMIN (and hence have access to certain privileges)
@@ -24,9 +26,14 @@ class CurrentSession:
         self.user_profile = user_profile
 
     def open_conn(self):
-        self.conn = pymysql.connect(host="localhost", user="root",
-                                    password="INSERTURPASSWORDHERE", database="record_boxes")
-        self.cursor = self.conn.cursor()
+        try :
+            self.conn = pymysql.connect(host="localhost", user="root",
+                                        password="INSERTYOURPASSWORDHERE", database="record_boxes")
+            self.cursor = self.conn.cursor()
+        except RuntimeError :
+            secure_quit(None, "Wrong password to SQL Database")
+
+
 
     def close_conn(self):
         self.conn.close()

@@ -4,6 +4,7 @@ from securelogin.login import login
 from launch import launch
 from securelogin.user_classes import ExistingUserProfile
 from securelogin.session import CurrentSession
+from util import write_action
 
 TEST = 0
 
@@ -16,6 +17,7 @@ def main():
         launch(session)
     else :
         session = login()
+        write_action(f"User {session.get_user().get_user_name()} logged in!")
         launch(session)
 
 if __name__ == "__main__":
